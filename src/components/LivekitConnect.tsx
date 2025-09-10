@@ -81,7 +81,7 @@ export default function LiveKitConnect() {
     setStatus("Joining room...");
     try {
       // Ottieni token
-      const response = await fetch("https://e9eb18ffcb1e.ngrok-free.app/token", {
+      const response = await fetch("https://f201e3bfd1b2.ngrok-free.app/token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -151,7 +151,7 @@ export default function LiveKitConnect() {
         return;
       }
 
-      const response = await fetch("https://e9eb18ffcb1e.ngrok-free.app/disconnect-agent", {
+      const response = await fetch("https://f201e3bfd1b2.ngrok-free.app/disconnect-agent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
