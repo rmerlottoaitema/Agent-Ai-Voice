@@ -17,25 +17,56 @@ export default function LiveKitConnect() {
   useEffect(() => {
     if (!room) return;
 
-    const handleParticipantConnected = (participant: RemoteParticipant) => {
-      console.log("Participant connected:", participant.identity);
-      setParticipants(prev => [...prev, participant]);
+    const subscribeParticipant = (participant: RemoteParticipant) => {
+
+      participant.audioTrackPublications.forEach((publication: any) => {
+        if (publication.isSubscribed && publication.track?.kind === "audio") {
+          const audioTrack = publication.track as RemoteAudioTrack;
+          const el = audioTrack.attach();
+          el.autoplay = true;
+          document.body.appendChild(el);
+        }
+
+        // Listener track audio
+        publication.on(
+          "subscribed",
+          (track: RemoteTrack, pub: RemoteTrackPublication) => {
+            if (track.kind === "audio") {
+              const audioTrack = track as RemoteAudioTrack;
+              const el = audioTrack.attach();
+              el.autoplay = true;
+              document.body.appendChild(el);
+            }
+          }
+        );
+      });
+
+      // Listener track
+      participant.on(
+        "trackSubscribed",
+        (track: RemoteTrack, pub: RemoteTrackPublication) => {
+          if (track.kind === "audio") {
+            const audioTrack = track as RemoteAudioTrack;
+            const el = audioTrack.attach();
+            el.autoplay = true;
+            document.body.appendChild(el);
+          }
+        }
+      );
     };
 
-    const handleParticipantDisconnected = (participant: RemoteParticipant) => {
-      console.log("Participant disconnected:", participant.identity);
-      setParticipants(prev => prev.filter(p => p.sid !== participant.sid));
-    };
+    room.on("participantConnected", (participant: RemoteParticipant) => {
+      console.log("🎉 Participant connected:", participant.identity);
+      subscribeParticipant(participant);
+    });
 
-    setParticipants(Array.from(room.remoteParticipants.values()));
+    room.remoteParticipants.forEach(subscribeParticipant);
 
-    // Event listeners
-    room.on("participantConnected", handleParticipantConnected);
-    room.on("participantDisconnected", handleParticipantDisconnected);
 
+    // Cleanup
     return () => {
-      room.off("participantConnected", handleParticipantConnected);
-      room.off("participantDisconnected", handleParticipantDisconnected);
+      room.removeAllListeners();
+
     };
   }, [room]);
 
