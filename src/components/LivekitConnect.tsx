@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Room, createLocalTracks, RemoteParticipant, RemoteAudioTrack, RemoteTrackPublication, RemoteTrack } from "livekit-client";
 import Control from "./Control";
+import Header from "./Header";
 
 const LIVEKIT_URL = "wss://aitematest-fmet0mg5.livekit.cloud";
 
@@ -179,6 +180,7 @@ export default function LiveKitConnect() {
 
   return (
     <React.Fragment>
+      <Header />
       <Control joinRoom={function (): void {
         throw new Error("Function not implemented.");
       }} room={undefined} isConnecting={false} disconnectRoom={function (): void {
