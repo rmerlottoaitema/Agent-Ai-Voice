@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Mic, MicOff, Users, Phone, PhoneOff, Wifi, WifiOff, Volume2 } from 'lucide-react';
 import StatusCard from './StatusCard';
+import { RemoteParticipant } from 'livekit-client';
 
 
 type ControlProps = {
@@ -9,7 +10,7 @@ type ControlProps = {
   isConnecting: boolean;
   disconnectRoom: () => void
   disconnectAllAgents: () => void
-  participants: []
+  participants: RemoteParticipant[]
 }
 
 export default function Control({ joinRoom, room, isConnecting, disconnectRoom, disconnectAllAgents, participants }: ControlProps) {

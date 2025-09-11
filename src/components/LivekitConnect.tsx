@@ -83,7 +83,7 @@ export default function LiveKitConnect() {
     setStatus("Joining room...");
     try {
       // Ottieni token
-      const response = await fetch("https://f201e3bfd1b2.ngrok-free.app/token", {
+      const response = await fetch("http://localhost:3000/token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -181,13 +181,7 @@ export default function LiveKitConnect() {
   return (
     <React.Fragment>
       <Header />
-      <Control joinRoom={function (): void {
-        throw new Error("Function not implemented.");
-      }} room={undefined} isConnecting={false} disconnectRoom={function (): void {
-        throw new Error("Function not implemented.");
-      }} disconnectAllAgents={function (): void {
-        throw new Error("Function not implemented.");
-      }} participants={[]} />
+      <Control joinRoom={joinRoom} room={room} isConnecting={false} disconnectRoom={disconnectRoom} participants={participants} disconnectAllAgents={disconnectAllAgents} />
     </React.Fragment>
 
     // <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
