@@ -3,10 +3,9 @@ import { Room, createLocalTracks, RemoteParticipant, RemoteAudioTrack, RemoteTra
 import Control from "./Control";
 import Header from "./Header";
 import ParticipantsCard from "./ParticipantsCard";
-import { Wifi, WifiOff } from "lucide-react";
 import DebugInfo from "./DebugInfo";
+import { disconnectAgentFromRoom, token } from "../services/server";
 
-const LIVEKIT_URL = "wss://aitematest-fmet0mg5.livekit.cloud";
 
 export default function LiveKitConnect() {
 
@@ -15,60 +14,28 @@ export default function LiveKitConnect() {
   const [participants, setParticipants] = useState<RemoteParticipant[]>([]);
 
 
-
   useEffect(() => {
     if (!room) return;
 
-    const subscribeParticipant = (participant: RemoteParticipant) => {
-      // Subscribiamo tutti i track audio già presenti
-      participant.audioTrackPublications.forEach((publication: any) => {
-        if (publication.isSubscribed && publication.track?.kind === "audio") {
-          const audioTrack = publication.track as RemoteAudioTrack;
-          const el = audioTrack.attach(); // crea <audio> HTML
-          el.autoplay = true;
-          document.body.appendChild(el); // o un container specifico
-        }
-
-        // Listener per track audio che si sottoscrivono successivamente
-        publication.on(
-          "subscribed",
-          (track: RemoteTrack, pub: RemoteTrackPublication) => {
-            if (track.kind === "audio") {
-              const audioTrack = track as RemoteAudioTrack;
-              const el = audioTrack.attach();
-              el.autoplay = true;
-              document.body.appendChild(el);
-            }
-          }
-        );
-      });
-
-      // Listener generale per nuovi track
-      participant.on(
-        "trackSubscribed",
-        (track: RemoteTrack, pub: RemoteTrackPublication) => {
-          if (track.kind === "audio") {
-            const audioTrack = track as RemoteAudioTrack;
-            const el = audioTrack.attach();
-            el.autoplay = true;
-            document.body.appendChild(el);
-          }
-        }
-      );
+    const handleParticipantConnected = (participant: RemoteParticipant) => {
+      console.log("Participant connected:", participant.identity);
+      setParticipants(prev => [...prev, participant]);
     };
 
-    // Ogni volta che un nuovo partecipante entra
-    room.on("participantConnected", (participant: RemoteParticipant) => {
-      console.log("🎉 Participant connected:", participant.identity);
-      subscribeParticipant(participant);
-    });
+    const handleParticipantDisconnected = (participant: RemoteParticipant) => {
+      console.log("Participant disconnected:", participant.identity);
+      setParticipants(prev => prev.filter(p => p.sid !== participant.sid));
+    };
 
-    // Subscribe ai partecipanti già presenti
-    room.remoteParticipants.forEach(subscribeParticipant);
+    setParticipants(Array.from(room.remoteParticipants.values()));
 
-    // Cleanup
+    // Event listeners
+    room.on("participantConnected", handleParticipantConnected);
+    room.on("participantDisconnected", handleParticipantDisconnected);
+
     return () => {
-      room.removeAllListeners();
+      room.off("participantConnected", handleParticipantConnected);
+      room.off("participantDisconnected", handleParticipantDisconnected);
     };
   }, [room]);
 
@@ -77,24 +44,11 @@ export default function LiveKitConnect() {
   const joinRoom = async () => {
     setStatus("Joining room...");
     try {
-      // Ottieni token
-      const response = await fetch("https://12ce002c93cc.ngrok-free.app/token", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          roomName: "sip-room",
-          participantName: `user-${Date.now()}`
-        }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Failed to get token");
-
-      console.log("Token received");
-
+      // Get token
+      const data = await token()
       setStatus("Connecting to room...");
 
-      // Crea e connetti alla stanza
+      // Create and connect a new room
       const r = new Room();
 
       // Aggiungi listener
@@ -103,7 +57,7 @@ export default function LiveKitConnect() {
         setParticipants(Array.from(r.remoteParticipants.values()));
       });
 
-      await r.connect(LIVEKIT_URL, data.token);
+      await r.connect(import.meta.env.VITE_LIVEKIT_URL, data.token);
 
       // Pubblica audio locale
       try {
@@ -146,18 +100,7 @@ export default function LiveKitConnect() {
         console.log("No agents to disconnect");
         return;
       }
-
-      const response = await fetch("https://12ce002c93cc.ngrok-free.app/disconnect-agent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          agentName: agentToDisconnect,
-          roomName: "sip-room"
-        }),
-      });
-
-      const data = await response.json();
-      console.log("Disconnect response:", data);
+      await disconnectAgentFromRoom(agentToDisconnect)
 
     } catch (error) {
       console.error("Disconnect error:", error);
