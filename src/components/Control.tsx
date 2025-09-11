@@ -19,6 +19,14 @@ export default function Control({ joinRoom, room, isConnecting, disconnectRoom, 
   const [connectionQuality, setConnectionQuality] = useState<string>('excellent');
 
 
+  const creationTime = (room as any)?.roomInfo.creationTime;
+  if (creationTime) {
+    const diffMs = Number(Date.now()) - Number(creationTime);
+    const diffMinutes = Math.floor(diffMs / 1000 / 60);
+    console.log(`La stanza è attiva da ${diffMinutes} minuti`);
+  }
+
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Connected': return 'text-green-500';

@@ -1,5 +1,6 @@
 import { Wifi, WifiOff } from "lucide-react";
 import { ReactNode, useState } from "react";
+import Timer from "./Timer";
 
 type StatusCardProps = {
     getConnectionIcon: () => ReactNode
@@ -10,7 +11,7 @@ type StatusCardProps = {
 
 export default function StatusCard({ getConnectionIcon, status, getStatusColor, connectionQuality }: StatusCardProps) {
 
-    console.log(status)
+
 
     return (
         <div className="flex items-center justify-between mb-4">
@@ -19,6 +20,7 @@ export default function StatusCard({ getConnectionIcon, status, getStatusColor, 
                 <span className={`font-semibold text-lg ${getStatusColor(status)}`}>
                     {status}
                 </span>
+                {status === "Connected" && <Timer />}
             </div>
             <div className="flex items-center space-x-2 text-slate-300">
                 <div className={`w-2 h-2 rounded-full ${connectionQuality === 'excellent' ? 'bg-green-500' :

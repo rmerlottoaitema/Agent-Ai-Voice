@@ -1,8 +1,9 @@
+import { Room } from "livekit-client";
 import React from "react";
 
 type DebugInfoProps = {
-    room: any;
-    connectionQuality: string
+    room: Room | null;
+    connectionQuality: string;
 }
 
 export default function DebugInfo({ room, connectionQuality }: DebugInfoProps) {
