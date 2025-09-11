@@ -1,11 +1,10 @@
 import React from "react";
-import LiveKitConnect from "./components/LivekitConnect";
-import VoiceAgent from "./components/VoiceAgent";
+import Home from "./pages/Home";
 
 function App() {
   return (
     <div>
-       <LiveKitConnect />
+       <Home/>
     </div>
   );
 }
