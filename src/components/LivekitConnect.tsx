@@ -3,7 +3,6 @@ import { Room, createLocalTracks, RemoteParticipant, RemoteAudioTrack, RemoteTra
 import Control from "./Control";
 import Header from "./Header";
 import ParticipantsCard from "./ParticipantsCard";
-import { Wifi, WifiOff } from "lucide-react";
 import DebugInfo from "./DebugInfo";
 
 const LIVEKIT_URL = "wss://aitematest-fmet0mg5.livekit.cloud";
@@ -19,56 +18,25 @@ export default function LiveKitConnect() {
   useEffect(() => {
     if (!room) return;
 
-    const subscribeParticipant = (participant: RemoteParticipant) => {
-      // Subscribiamo tutti i track audio già presenti
-      participant.audioTrackPublications.forEach((publication: any) => {
-        if (publication.isSubscribed && publication.track?.kind === "audio") {
-          const audioTrack = publication.track as RemoteAudioTrack;
-          const el = audioTrack.attach(); // crea <audio> HTML
-          el.autoplay = true;
-          document.body.appendChild(el); // o un container specifico
-        }
-
-        // Listener per track audio che si sottoscrivono successivamente
-        publication.on(
-          "subscribed",
-          (track: RemoteTrack, pub: RemoteTrackPublication) => {
-            if (track.kind === "audio") {
-              const audioTrack = track as RemoteAudioTrack;
-              const el = audioTrack.attach();
-              el.autoplay = true;
-              document.body.appendChild(el);
-            }
-          }
-        );
-      });
-
-      // Listener generale per nuovi track
-      participant.on(
-        "trackSubscribed",
-        (track: RemoteTrack, pub: RemoteTrackPublication) => {
-          if (track.kind === "audio") {
-            const audioTrack = track as RemoteAudioTrack;
-            const el = audioTrack.attach();
-            el.autoplay = true;
-            document.body.appendChild(el);
-          }
-        }
-      );
+    const handleParticipantConnected = (participant: RemoteParticipant) => {
+      console.log("Participant connected:", participant.identity);
+      setParticipants(prev => [...prev, participant]);
     };
 
-    // Ogni volta che un nuovo partecipante entra
-    room.on("participantConnected", (participant: RemoteParticipant) => {
-      console.log("🎉 Participant connected:", participant.identity);
-      subscribeParticipant(participant);
-    });
+    const handleParticipantDisconnected = (participant: RemoteParticipant) => {
+      console.log("Participant disconnected:", participant.identity);
+      setParticipants(prev => prev.filter(p => p.sid !== participant.sid));
+    };
 
-    // Subscribe ai partecipanti già presenti
-    room.remoteParticipants.forEach(subscribeParticipant);
+    setParticipants(Array.from(room.remoteParticipants.values()));
 
-    // Cleanup
+    // Event listeners
+    room.on("participantConnected", handleParticipantConnected);
+    room.on("participantDisconnected", handleParticipantDisconnected);
+
     return () => {
-      room.removeAllListeners();
+      room.off("participantConnected", handleParticipantConnected);
+      room.off("participantDisconnected", handleParticipantDisconnected);
     };
   }, [room]);
 

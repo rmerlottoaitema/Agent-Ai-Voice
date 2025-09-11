@@ -88,7 +88,7 @@ export default function ParticipantsCard({ participants, room, disconnectAgent }
                     <div className="text-center py-12">
                         <Users className="w-16 h-16 text-slate-400 mx-auto mb-4" />
                         <p className="text-slate-300 text-lg">No participants in room</p>
-                        <p className="text-slate-300 text-sm mt-2">Join a room to start voice communication</p>
+                        <p className="text-slate-300 text-sm mt-2">The room is waiting for someone to connect</p>
                     </div>
                 )}
             </div>
