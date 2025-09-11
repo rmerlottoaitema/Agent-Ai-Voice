@@ -6,7 +6,6 @@ import ParticipantsCard from "./ParticipantsCard";
 import DebugInfo from "./DebugInfo";
 import { disconnectAgentFromRoom, token } from "../services/server";
 
-const LIVEKIT_URL = "wss://aitematest-fmet0mg5.livekit.cloud";
 
 export default function LiveKitConnect() {
 
@@ -58,7 +57,7 @@ export default function LiveKitConnect() {
         setParticipants(Array.from(r.remoteParticipants.values()));
       });
 
-      await r.connect(LIVEKIT_URL, data.token);
+      await r.connect(import.meta.env.VITE_LIVEKIT_URL, data.token);
 
       // Pubblica audio locale
       try {

@@ -2,7 +2,7 @@
 
 
 export const token = async() => {
-    const response = await fetch("https://12ce002c93cc.ngrok-free.app/token", {
+    const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/token`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -18,7 +18,7 @@ export const token = async() => {
 }
 
 export const disconnectAgentFromRoom =  async(agentToDisconnect:string | undefined) => {
-     const response = await fetch("https://12ce002c93cc.ngrok-free.app/disconnect-agent", {
+     const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/disconnect-agent`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
