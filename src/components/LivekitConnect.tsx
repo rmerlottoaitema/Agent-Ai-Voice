@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Room, createLocalTracks, RemoteParticipant, RemoteAudioTrack, RemoteTrackPublication, RemoteTrack } from "livekit-client";
 import Control from "./Control";
 import Header from "./Header";
+import ParticipantsCard from "./ParticipantsCard";
 
 const LIVEKIT_URL = "wss://aitematest-fmet0mg5.livekit.cloud";
 
@@ -182,6 +183,7 @@ export default function LiveKitConnect() {
     <React.Fragment>
       <Header />
       <Control joinRoom={joinRoom} room={room} isConnecting={false} disconnectRoom={disconnectRoom} participants={participants} disconnectAllAgents={disconnectAllAgents} />
+      <ParticipantsCard participants={participants} room={room} disconnectAgent={disconnectAgent} />
     </React.Fragment>
 
     // <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
