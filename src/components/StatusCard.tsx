@@ -10,7 +10,7 @@ type StatusCardProps = {
 
 export default function StatusCard({ getConnectionIcon, status, getStatusColor, connectionQuality }: StatusCardProps) {
 
-
+    console.log(status)
 
     return (
         <div className="flex items-center justify-between mb-4">

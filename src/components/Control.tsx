@@ -11,12 +11,12 @@ type ControlProps = {
   disconnectRoom: () => void
   disconnectAllAgents: () => void
   participants: RemoteParticipant[]
+  status: string
 }
 
-export default function Control({ joinRoom, room, isConnecting, disconnectRoom, disconnectAllAgents, participants }: ControlProps) {
+export default function Control({ joinRoom, room, isConnecting, disconnectRoom, disconnectAllAgents, participants, status }: ControlProps) {
 
   const [connectionQuality, setConnectionQuality] = useState<string>('excellent');
-  const [status, setStatus] = useState<string>('Disconnected');
 
 
   const getStatusColor = (status: string) => {

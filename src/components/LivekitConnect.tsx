@@ -9,20 +9,12 @@ import DebugInfo from "./DebugInfo";
 const LIVEKIT_URL = "wss://aitematest-fmet0mg5.livekit.cloud";
 
 export default function LiveKitConnect() {
-  const [status, setStatus] = useState("Not connected");
+
+  const [status, setStatus] = useState<string>('Disconnected');
   const [room, setRoom] = useState<Room | null>(null);
   const [participants, setParticipants] = useState<RemoteParticipant[]>([]);
 
-  // DEBUG: Log dettagliato della stanza
-  const logRoomInfo = (r: Room) => {
-    console.log("=== ROOM INFO ===");
-    console.log("Room name:", r.name);
-    console.log("Room SID:", r.getSid);
-    console.log("Local participant:", r.localParticipant.identity);
-    console.log("Remote participants:", Array.from(r.remoteParticipants.keys()));
-    console.log("Remote participants count:", r.remoteParticipants.size);
-    console.log("=================");
-  };
+
 
   useEffect(() => {
     if (!room) return;
@@ -108,7 +100,6 @@ export default function LiveKitConnect() {
       // Aggiungi listener
       r.on("connected", () => {
         console.log("✅ Room connected successfully");
-        logRoomInfo(r);
         setParticipants(Array.from(r.remoteParticipants.values()));
       });
 
@@ -130,7 +121,7 @@ export default function LiveKitConnect() {
       }
 
       setRoom(r);
-      setStatus(`Connected to room: ${r.name}`);
+      setStatus("Connected");
 
     } catch (err) {
       console.error("Connection error:", err);
@@ -156,7 +147,7 @@ export default function LiveKitConnect() {
         return;
       }
 
-      const response = await fetch("https://f201e3bfd1b2.ngrok-free.app/disconnect-agent", {
+      const response = await fetch("http://localhost:3000/disconnect-agent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -184,7 +175,7 @@ export default function LiveKitConnect() {
   return (
     <React.Fragment>
       <Header />
-      <Control joinRoom={joinRoom} room={room} isConnecting={false} disconnectRoom={disconnectRoom} participants={participants} disconnectAllAgents={disconnectAllAgents} />
+      <Control joinRoom={joinRoom} room={room} isConnecting={false} disconnectRoom={disconnectRoom} participants={participants} disconnectAllAgents={disconnectAllAgents} status={status} />
       <ParticipantsCard participants={participants} room={room} disconnectAgent={disconnectAgent} />
       <DebugInfo room={room} connectionQuality={"excellent"} />
     </React.Fragment>
