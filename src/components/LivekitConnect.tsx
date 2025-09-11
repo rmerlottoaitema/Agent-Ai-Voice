@@ -3,6 +3,8 @@ import { Room, createLocalTracks, RemoteParticipant, RemoteAudioTrack, RemoteTra
 import Control from "./Control";
 import Header from "./Header";
 import ParticipantsCard from "./ParticipantsCard";
+import { Wifi, WifiOff } from "lucide-react";
+import DebugInfo from "./DebugInfo";
 
 const LIVEKIT_URL = "wss://aitematest-fmet0mg5.livekit.cloud";
 
@@ -184,89 +186,7 @@ export default function LiveKitConnect() {
       <Header />
       <Control joinRoom={joinRoom} room={room} isConnecting={false} disconnectRoom={disconnectRoom} participants={participants} disconnectAllAgents={disconnectAllAgents} />
       <ParticipantsCard participants={participants} room={room} disconnectAgent={disconnectAgent} />
+      <DebugInfo room={room} connectionQuality={"excellent"} />
     </React.Fragment>
-
-    // <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-    //   <h1>LiveKit Voice Agent</h1>
-
-    //   <div style={{ marginBottom: '20px' }}>
-    //     <button 
-    //       onClick={joinRoom} 
-    //       disabled={!!room}
-    //       style={{ marginRight: '10px', padding: '10px 20px' }}
-    //     >
-    //       Join Room
-    //     </button>
-
-    //     <button 
-    //       onClick={disconnectRoom} 
-    //       disabled={!room}
-    //       style={{ marginRight: '10px', padding: '10px 20px' }}
-    //     >
-    //       Leave Room
-    //     </button>
-
-    //     <button 
-    //       onClick={disconnectAllAgents} 
-    //       disabled={participants.length <= 1}
-    //       style={{ padding: '10px 20px', backgroundColor: '#ff4444', color: 'white' }}
-    //     >
-    //       Disconnect All Agents
-    //     </button>
-    //   </div>
-
-    //   <p><strong>Status:</strong> {status}</p>
-
-    //   <div style={{ marginTop: '20px' }}>
-    //     <h3>Participants ({participants.length}):</h3>
-    //     <ul style={{ listStyle: 'none', padding: 0 }}>
-    //       {participants.map(participant => (
-    //         <li key={participant.sid} style={{ 
-    //           padding: '10px', 
-    //           margin: '5px 0', 
-    //           backgroundColor: '#f0f0f0',
-    //           borderRadius: '5px',
-    //           display: 'flex',
-    //           justifyContent: 'space-between',
-    //           alignItems: 'center'
-    //         }}>
-    //           <span>
-    //             {participant.identity} 
-    //             {participant.identity === room?.localParticipant.identity && " (You)"}
-    //             {participant.isSpeaking && " 🎤"}
-    //           </span>
-
-    //           {participant.identity !== room?.localParticipant.identity && (
-    //             <button 
-    //               onClick={() => disconnectAgent(participant.identity)}
-    //               style={{ 
-    //                 padding: '5px 10px', 
-    //                 backgroundColor: '#ff6b6b', 
-    //                 color: 'white',
-    //                 border: 'none',
-    //                 borderRadius: '3px',
-    //                 cursor: 'pointer'
-    //               }}
-    //             >
-    //               Disconnect
-    //             </button>
-    //           )}
-    //         </li>
-    //       ))}
-
-    //       {participants.length === 0 && (
-    //         <li style={{ padding: '10px', color: '#666' }}>
-    //           No participants in room...
-    //         </li>
-    //       )}
-    //     </ul>
-    //   </div>
-
-    //   <div style={{ marginTop: '20px' }}>
-    //     <h4>Debug Info:</h4>
-    //     <p><strong>Room:</strong> {room?.name || 'Not connected'}</p>
-    //     <p><strong>Your Identity:</strong> {room?.localParticipant.identity || 'Unknown'}</p>
-    //   </div>
-    // </div>
   );
 }

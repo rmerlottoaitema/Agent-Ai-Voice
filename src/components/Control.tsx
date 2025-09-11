@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Mic, MicOff, Users, Phone, PhoneOff, Wifi, WifiOff, Volume2, Bot } from 'lucide-react';
 import StatusCard from './StatusCard';
-import { RemoteParticipant } from 'livekit-client';
+import { RemoteParticipant, Room } from 'livekit-client';
 
 
 type ControlProps = {
   joinRoom: () => void;
-  room: any;
+  room: Room | null;
   isConnecting: boolean;
   disconnectRoom: () => void
   disconnectAllAgents: () => void
@@ -15,9 +15,28 @@ type ControlProps = {
 
 export default function Control({ joinRoom, room, isConnecting, disconnectRoom, disconnectAllAgents, participants }: ControlProps) {
 
+  const [connectionQuality, setConnectionQuality] = useState<string>('excellent');
+  const [status, setStatus] = useState<string>('Disconnected');
+
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Connected': return 'text-green-500';
+      case 'Connecting...': return 'text-yellow-500';
+      case 'Disconnected': return 'text-red-500';
+      default: return 'text-gray-500';
+    }
+  };
+
+  const getConnectionIcon = () => {
+    if (status === 'Connected') return <Wifi className="w-4 h-4 text-green-500" />;
+    if (status === 'Connecting...') return <div className="w-4 h-4 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" />;
+    return <WifiOff className="w-4 h-4 text-red-500" />;
+  };
+
   return (
     <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 mb-6 border border-white/20 shadow-2xl">
-      <StatusCard />
+      <StatusCard getConnectionIcon={getConnectionIcon} status={status} getStatusColor={getStatusColor} connectionQuality={connectionQuality} />
       <div className="flex flex-wrap gap-3">
         <button
           onClick={joinRoom}

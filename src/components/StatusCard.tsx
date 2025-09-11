@@ -1,26 +1,16 @@
 import { Wifi, WifiOff } from "lucide-react";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 
-export default function StatusCard() {
+type StatusCardProps = {
+    getConnectionIcon: () => ReactNode
+    status: string
+    getStatusColor: (status: string) => void
+    connectionQuality: string
+}
 
-    const [status, setStatus] = useState('Disconnected');
-    const [connectionQuality, setConnectionQuality] = useState('excellent');
+export default function StatusCard({ getConnectionIcon, status, getStatusColor, connectionQuality }: StatusCardProps) {
 
 
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'Connected': return 'text-green-500';
-            case 'Connecting...': return 'text-yellow-500';
-            case 'Disconnected': return 'text-red-500';
-            default: return 'text-gray-500';
-        }
-    };
-
-    const getConnectionIcon = () => {
-        if (status === 'Connected') return <Wifi className="w-4 h-4 text-green-500" />;
-        if (status === 'Connecting...') return <div className="w-4 h-4 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" />;
-        return <WifiOff className="w-4 h-4 text-red-500" />;
-    };
 
     return (
         <div className="flex items-center justify-between mb-4">
