@@ -4,6 +4,7 @@ import Control from "./Control";
 import Header from "./Header";
 import ParticipantsCard from "./ParticipantsCard";
 import DebugInfo from "./DebugInfo";
+import { disconnectAgentFromRoom, token } from "../services/server";
 
 const LIVEKIT_URL = "wss://aitematest-fmet0mg5.livekit.cloud";
 
@@ -12,7 +13,6 @@ export default function LiveKitConnect() {
   const [status, setStatus] = useState<string>('Disconnected');
   const [room, setRoom] = useState<Room | null>(null);
   const [participants, setParticipants] = useState<RemoteParticipant[]>([]);
-
 
 
   useEffect(() => {
@@ -45,24 +45,11 @@ export default function LiveKitConnect() {
   const joinRoom = async () => {
     setStatus("Joining room...");
     try {
-      // Ottieni token
-      const response = await fetch("https://12ce002c93cc.ngrok-free.app/token", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          roomName: "sip-room",
-          participantName: `user-${Date.now()}`
-        }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Failed to get token");
-
-      console.log("Token received");
-
+      // Get token
+      const data = await token()
       setStatus("Connecting to room...");
 
-      // Crea e connetti alla stanza
+      // Create and connect a new room
       const r = new Room();
 
       // Aggiungi listener
@@ -114,18 +101,7 @@ export default function LiveKitConnect() {
         console.log("No agents to disconnect");
         return;
       }
-
-      const response = await fetch("https://12ce002c93cc.ngrok-free.app/disconnect-agent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          agentName: agentToDisconnect,
-          roomName: "sip-room"
-        }),
-      });
-
-      const data = await response.json();
-      console.log("Disconnect response:", data);
+      await disconnectAgentFromRoom(agentToDisconnect)
 
     } catch (error) {
       console.error("Disconnect error:", error);
