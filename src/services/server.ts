@@ -30,3 +30,15 @@ export const disconnectAgentFromRoom =  async(agentToDisconnect:string | undefin
       const data = await response.json();
       return data
 }
+
+
+export const startAgent =  async(roomName:string | undefined) => {
+     const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/start-agent`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ roomName }),
+      });
+
+      const data = await response.json();
+      return data
+}

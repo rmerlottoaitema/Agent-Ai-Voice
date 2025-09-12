@@ -4,7 +4,7 @@ import Control from "./Control";
 import Header from "./Header";
 import ParticipantsCard from "./ParticipantsCard";
 import DebugInfo from "./DebugInfo";
-import { disconnectAgentFromRoom, token } from "../services/server";
+import { disconnectAgentFromRoom, startAgent, token } from "../services/server";
 
 
 export default function LiveKitConnect() {
@@ -18,7 +18,6 @@ export default function LiveKitConnect() {
     if (!room) return;
 
     const subscribeParticipant = (participant: RemoteParticipant) => {
-
       participant.audioTrackPublications.forEach((publication: any) => {
         if (publication.isSubscribed && publication.track?.kind === "audio") {
           const audioTrack = publication.track as RemoteAudioTrack;
@@ -27,48 +26,78 @@ export default function LiveKitConnect() {
           document.body.appendChild(el);
         }
 
-        // Listener track audio
-        publication.on(
-          "subscribed",
-          (track: RemoteTrack, pub: RemoteTrackPublication) => {
-            if (track.kind === "audio") {
-              const audioTrack = track as RemoteAudioTrack;
-              const el = audioTrack.attach();
-              el.autoplay = true;
-              document.body.appendChild(el);
-            }
-          }
-        );
-      });
-
-      // Listener track
-      participant.on(
-        "trackSubscribed",
-        (track: RemoteTrack, pub: RemoteTrackPublication) => {
+        publication.on("subscribed", (track: RemoteTrack) => {
           if (track.kind === "audio") {
             const audioTrack = track as RemoteAudioTrack;
             const el = audioTrack.attach();
             el.autoplay = true;
             document.body.appendChild(el);
           }
+        });
+      });
+
+      participant.on("trackSubscribed", (track: RemoteTrack) => {
+        if (track.kind === "audio") {
+          const audioTrack = track as RemoteAudioTrack;
+          const el = audioTrack.attach();
+          el.autoplay = true;
+          document.body.appendChild(el);
         }
+      });
+    };
+
+    // Sottoscrivi partecipanti già presenti
+    room.remoteParticipants.forEach(subscribeParticipant);
+    setParticipants(Array.from(room.remoteParticipants.values()));
+
+    // Listener per nuovi partecipanti
+    const handleParticipantConnected = (participant: RemoteParticipant) => {
+      console.log("🎉 Participant connected:", participant.identity);
+      subscribeParticipant(participant);
+      setParticipants((prev) => [...prev, participant]);
+    };
+
+    // Listener per partecipanti che lasciano
+    const handleParticipantDisconnected = (participant: RemoteParticipant) => {
+      console.log("❌ Participant disconnected:", participant.identity);
+
+      // Rimuovi audio dal DOM
+      participant.audioTrackPublications.forEach(({ track }) => {
+        if (track) {
+          track.detach().forEach((el) => el.remove());
+        }
+      });
+
+      // Rimuovi listener
+      participant.removeAllListeners("trackSubscribed");
+      participant.audioTrackPublications.forEach((pub: any) => {
+        pub.removeAllListeners("subscribed");
+      });
+
+      // Aggiorna stato React
+      setParticipants((prev) =>
+        prev.filter((p) => p.identity !== participant.identity)
       );
     };
 
-    room.on("participantConnected", (participant: RemoteParticipant) => {
-      console.log("🎉 Participant connected:", participant.identity);
-      subscribeParticipant(participant);
-    });
-
-    room.remoteParticipants.forEach(subscribeParticipant);
-
+    room.on("participantConnected", handleParticipantConnected);
+    room.on("participantDisconnected", handleParticipantDisconnected);
 
     // Cleanup
     return () => {
-      room.removeAllListeners();
+      room.removeListener("participantConnected", handleParticipantConnected);
+      room.removeListener("participantDisconnected", handleParticipantDisconnected);
 
+      room.remoteParticipants.forEach((participant: RemoteParticipant) => {
+        participant.removeAllListeners("trackSubscribed");
+        participant.audioTrackPublications.forEach((pub: any) => {
+          pub.removeAllListeners("subscribed");
+        });
+      });
     };
   }, [room]);
+
+
 
 
 
@@ -78,7 +107,6 @@ export default function LiveKitConnect() {
       // Get token
       const data = await token()
       setStatus("Connecting to room...");
-
       // Create and connect a new room
       const r = new Room();
 
