@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Mic, MicOff, Users, Phone, PhoneOff, Wifi, WifiOff, Volume2, Bot, BotOff, BotMessageSquare } from 'lucide-react';
 import StatusCard from './StatusCard';
-import { RemoteParticipant, Room } from 'livekit-client';
+import { Participant, RemoteParticipant, Room } from 'livekit-client';
 import { startAgent } from '../services/server';
 
 
@@ -18,10 +18,12 @@ type ControlProps = {
 export default function Control({ joinRoom, room, isConnecting, disconnectRoom, disconnectAllAgents, participants, status }: ControlProps) {
 
   const [connectionQuality, setConnectionQuality] = useState<string>('excellent');
-
+  const [agentBtn, setAgentBtn] = useState<boolean>(false)
 
   const startSpeakToAgent = async (): Promise<any> => {
-    return await startAgent(room?.name)
+    await startAgent(room?.name)
+    setAgentBtn(true)
+    return
   }
 
   const getStatusColor = (status: string) => {
@@ -63,7 +65,7 @@ export default function Control({ joinRoom, room, isConnecting, disconnectRoom, 
 
         <button
           onClick={startSpeakToAgent}
-          disabled={status !== 'Connected'}
+          disabled={status !== 'Connected' || agentBtn === true}
           className={`flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-red-900  text-white rounded-xl font-semibold shadow-lg  hover:from-teal-600 hover:to-red-950  disabled:from-gray-500 disabled:to-gray-600 disabled:cursor-not-allowedtransition-all duration-300 transform    hover:scale-105 active:scale-95  `}
         >
           <BotMessageSquare className="w-5 h-5 animate-bounce" />
@@ -71,7 +73,7 @@ export default function Control({ joinRoom, room, isConnecting, disconnectRoom, 
         </button>
         <button
           onClick={disconnectAllAgents}
-          disabled={participants.length <= 1}
+          disabled={participants.length <= 1 && agentBtn === false}
           className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl font-semibold shadow-lg hover:from-orange-600 hover:to-red-700 disabled:from-gray-500 disabled:to-gray-600 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 active:scale-95"
         >
           <BotOff className="w-5 h-5" />
